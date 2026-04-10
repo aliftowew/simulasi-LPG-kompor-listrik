@@ -133,6 +133,7 @@ export default function App() {
             <VR sym="Q" param="Konsumsi LPG per RT per bulan" val="11,4" unit="kg" src="konsumsiLPG"/>
             <VR sym="P_s" param="Harga LPG subsidi (dibayar masyarakat)" val="Rp 4.250" unit="/kg" src="hargaSubsidi"/>
             <VR sym="P_e" param="Harga keekonomian LPG (harga sebenarnya)" val="Rp 19.698" unit="/kg" src="hargaEkonomian" color={C.red}/>
+            <VR sym="\alpha" param="Tingkat konversi (bisa diubah di Bab 4)" val={`${alpha}`} unit="%" color={C.accent}/>
             <tr><td colSpan={4} style={{padding:"16px 8px 6px",fontSize:11,color:C.accent,fontWeight:700,letterSpacing:1,textTransform:"uppercase"}}>Impor & Subsidi Nasional</td></tr>
             <VR sym="V_{\text{imp}}" param="Volume impor LPG/tahun (2024)" val="6,89" unit="juta ton" src="imporVolume"/>
             <VR sym="C_{\text{imp}}" param="Nilai impor LPG/tahun (2024)" val="US$ 3,79" unit="miliar" src="imporNilai" color={C.red}/>
@@ -177,7 +178,7 @@ export default function App() {
           <ST icon="📈" title="Bab 2: Dampak Positif — Dikuantifikasi" sub="Kita identifikasi tiga benefit utama yang bisa dihitung secara presisi menggunakan variabel di Bab 1."/>
           <P>Misalkan <Latex>{`\\alpha`}</Latex> adalah persentase rumah tangga yang berhasil dikonversi. Maka jumlah RT yang beralih ke kompor induksi:</P>
           <FB texLines={["RT_{\\text{konversi}} = \\alpha \\times N"]}/>
-          <P>Dengan <Latex>{`\\alpha = 30\\%`}</Latex> dan <Latex>{`N = 52`}</Latex> juta, berarti 15,6 juta RT. Mari hitung benefit dari konversi ini.</P>
+          <P>Dengan <Latex>{`\\alpha = ${alpha}\\%`}</Latex> dan <Latex>{`N = ${(rt/1e6).toFixed(0)}`}</Latex> juta, berarti <b style={{color:C.accent}}>{(c.rtK/1e6).toFixed(1)} juta RT</b>. Geser slider α di Bab 4 untuk mengubah skenario — semua angka benefit dan cost akan otomatis terupdate.</P>
 
           <h3 style={{fontSize:16,color:C.green,margin:"24px 0 8px",fontFamily:"'Sora',sans-serif"}}><Latex>{"B_1"}</Latex> — Penghematan Subsidi APBN</h3>
           <P>Ini adalah benefit terbesar. Logikanya sederhana: setiap RT yang beralih ke kompor induksi <b>tidak lagi membeli LPG bersubsidi</b>. Konsumsi LPG mereka (Q kg/bulan) dikalikan subsidi per kg (Rp 15.448) dan 12 bulan memberikan penghematan subsidi tahunan per RT.</P>
