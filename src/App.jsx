@@ -96,7 +96,6 @@ export default function App(){
     const C1=rtK*bK,C2=rtK*.5*750000,C3=rtK*.6*800000,C4=rtK*50000,C6=3e12;
     const Co=C1+C2+C3+C4+C6,C5=sLPG&&sel<0?rtK*Math.abs(sel)*12:0;
     const nb=Bt-C5,roi=nb>0?Co/(nb/12):Infinity,gw=(rtK*dW*0.3)/1e9;
-    const devisaImporKompor=rtK*hargaKomporUSD*kurs; // one-time
     const devisaHematLPGPerTahun=B2_devisa;
     const prodLokalUnit=prodLokalJt*1e6;
     const unitImporKompor=Math.max(0,rtK-prodLokalUnit);
