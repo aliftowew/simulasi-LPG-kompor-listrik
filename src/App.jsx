@@ -206,7 +206,7 @@ export default function App(){
               <AreaChart data={impD} margin={{top:5,right:10,left:0,bottom:5}}>
                 <defs><linearGradient id="gi" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={C.red} stopOpacity={.35}/><stop offset="100%" stopColor={C.red} stopOpacity={.05}/></linearGradient><linearGradient id="gd" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={C.green} stopOpacity={.35}/><stop offset="100%" stopColor={C.green} stopOpacity={.05}/></linearGradient></defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={C.border}/><XAxis dataKey="t" tick={{fontSize:11,fill:C.textMuted}}/><YAxis tick={{fontSize:11,fill:C.textMuted}} unit=" jt"/>
-                <Tooltip contentStyle={TT}/><Area type="monotone" dataKey="impor" stroke={C.red} fill="url(#gi)" strokeWidth={2} name="Impor"/><Area type="monotone" dataKey="dom" stroke={C.green} fill="url(#gd)" strokeWidth={2} name="Domestik"/><Legend wrapperStyle={{fontSize:11}}/>
+                <Tooltip contentStyle={TT} labelStyle={{color:C.text}} itemStyle={{color:C.text}}/><Area type="monotone" dataKey="impor" stroke={C.red} fill="url(#gi)" strokeWidth={2} name="Impor"/><Area type="monotone" dataKey="dom" stroke={C.green} fill="url(#gd)" strokeWidth={2} name="Domestik"/><Legend wrapperStyle={{fontSize:11}}/>
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -354,12 +354,12 @@ export default function App(){
           <Sec accent={C.green}>
             <h3 style={{fontSize:14,fontWeight:700,color:C.textBright,margin:"0 0 4px"}}>Komposisi Benefit/Tahun (Tanpa Double Counting)</h3>
             <P>Total <b style={{color:C.green}}>{fmtT(c.Bt)}</b> = B₁ + B₃ saja. B₂ (devisa) tidak dijumlahkan karena sudah tercakup dalam B₁.</P>
-            <ResponsiveContainer width="100%" height={140}><BarChart data={bD} layout="vertical" margin={{top:0,right:20,left:0,bottom:0}}><XAxis type="number" tick={{fontSize:10,fill:C.textMuted}} tickFormatter={v=>`${v.toFixed(0)}T`}/><YAxis type="category" dataKey="name" tick={{fontSize:11,fill:C.text}} width={150}/><Tooltip contentStyle={TT} formatter={v=>[`Rp ${v.toFixed(1)} T`]}/><Bar dataKey="value" radius={[0,6,6,0]}>{bD.map((e,i)=><Cell key={i} fill={e.color}/>)}</Bar></BarChart></ResponsiveContainer>
+            <ResponsiveContainer width="100%" height={140}><BarChart data={bD} layout="vertical" margin={{top:0,right:20,left:0,bottom:0}}><XAxis type="number" tick={{fontSize:10,fill:C.textMuted}} tickFormatter={v=>`${v.toFixed(0)}T`}/><YAxis type="category" dataKey="name" tick={{fontSize:11,fill:C.text}} width={150}/><Tooltip contentStyle={TT} labelStyle={{color:C.text}} itemStyle={{color:C.text}} formatter={v=>[`Rp ${v.toFixed(1)} T`]}/><Bar dataKey="value" radius={[0,6,6,0]}>{bD.map((e,i)=><Cell key={i} fill={e.color}/>)}</Bar></BarChart></ResponsiveContainer>
           </Sec>
           <Sec accent={C.red}>
             <h3 style={{fontSize:14,fontWeight:700,color:C.textBright,margin:"0 0 4px"}}>Komposisi Biaya (One-time)</h3>
             <P>Total <b style={{color:C.red}}>{fmtT(c.Co)}</b>. Kompor (C₁) mendominasi — paling bisa ditekan via manufaktur lokal.</P>
-            <ResponsiveContainer width="100%" height={140}><PieChart><Pie data={cD} cx="50%" cy="50%" innerRadius={40} outerRadius={65} dataKey="value" paddingAngle={2} startAngle={90} endAngle={-270}>{cD.map((e,i)=><Cell key={i} fill={e.color}/>)}</Pie><Tooltip contentStyle={TT} formatter={v=>[`Rp ${v.toFixed(1)} T`]}/></PieChart></ResponsiveContainer>
+            <ResponsiveContainer width="100%" height={140}><PieChart><Pie data={cD} cx="50%" cy="50%" innerRadius={40} outerRadius={65} dataKey="value" paddingAngle={2} startAngle={90} endAngle={-270}>{cD.map((e,i)=><Cell key={i} fill={e.color}/>)}</Pie><Tooltip contentStyle={TT} labelStyle={{color:C.text}} itemStyle={{color:C.text}} formatter={v=>[`Rp ${v.toFixed(1)} T`]}/></PieChart></ResponsiveContainer>
             <div style={{display:"flex",flexWrap:"wrap",gap:"4px 12px",justifyContent:"center",marginTop:6}}>{cD.map((d,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:8,height:8,borderRadius:2,background:d.color}}/><span style={{fontSize:10,color:C.textMuted}}>{d.name}</span></div>)}</div>
           </Sec>
         </div>
@@ -367,13 +367,13 @@ export default function App(){
           <Sec accent={C.cyan}>
             <h3 style={{fontSize:14,fontWeight:700,color:C.textBright,margin:"0 0 4px"}}>Biaya Memasak/RT/Bulan</h3>
             <P>Distorsi subsidi terlihat jelas: LPG subsidi (bar 1) vs harga keekonomiannya (bar 3) berbeda hampir 5× lipat.</P>
-            <ResponsiveContainer width="100%" height={200}><BarChart data={mD} margin={{top:5,right:10,left:10,bottom:5}}><XAxis dataKey="label" tick={{fontSize:10,fill:C.textMuted}} interval={0}/><YAxis tick={{fontSize:10,fill:C.textMuted}} tickFormatter={v=>`${(v/1000).toFixed(0)}rb`}/><Tooltip contentStyle={TT} formatter={v=>[`Rp ${fmt(v)}`]}/><Bar dataKey="biaya" radius={[6,6,0,0]}>{mD.map((e,i)=><Cell key={i} fill={e.color}/>)}</Bar></BarChart></ResponsiveContainer>
+            <ResponsiveContainer width="100%" height={200}><BarChart data={mD} margin={{top:5,right:10,left:10,bottom:5}}><XAxis dataKey="label" tick={{fontSize:10,fill:C.textMuted}} interval={0}/><YAxis tick={{fontSize:10,fill:C.textMuted}} tickFormatter={v=>`${(v/1000).toFixed(0)}rb`}/><Tooltip contentStyle={TT} labelStyle={{color:C.text}} itemStyle={{color:C.text}} formatter={v=>[`Rp ${fmt(v)}`]}/><Bar dataKey="biaya" radius={[6,6,0,0]}>{mD.map((e,i)=><Cell key={i} fill={e.color}/>)}</Bar></BarChart></ResponsiveContainer>
             <div style={{marginTop:10,padding:"10px 14px",borderRadius:8,background:c.sel>0?C.greenDim:C.redDim,border:`1px solid ${c.sel>0?C.green:C.red}30`}}><span style={{fontSize:12,color:c.sel>0?C.green:C.red}}>{c.sel>0?`✅ Induksi hemat Rp ${fmt(c.sel)}/bln`:`⚠️ Induksi +Rp ${fmt(Math.abs(c.sel))}/bln — distorsi subsidi`}</span></div>
           </Sec>
           <Sec accent={C.blue}>
             <h3 style={{fontSize:14,fontWeight:700,color:C.textBright,margin:"0 0 4px"}}>Benefit vs Cost — Skala Konversi</h3>
             <P>Garis hijau (B₁+B₃/tahun) selalu di atas merah putus-putus (cost sekali) — di skala berapa pun, balik modal &lt;1 tahun.</P>
-            <ResponsiveContainer width="100%" height={200}><LineChart data={sD} margin={{top:5,right:10,left:0,bottom:5}}><CartesianGrid strokeDasharray="3 3" stroke={C.border}/><XAxis dataKey="persen" tick={{fontSize:10,fill:C.textMuted}}/><YAxis tick={{fontSize:10,fill:C.textMuted}}/><Tooltip contentStyle={TT} formatter={v=>[`Rp ${v} T`]}/><Line type="monotone" dataKey="benefit" stroke={C.green} strokeWidth={2} name="Benefit/thn" dot={{r:3}}/><Line type="monotone" dataKey="cost" stroke={C.red} strokeWidth={2} name="Cost (sekali)" dot={{r:3}} strokeDasharray="5 5"/><Legend wrapperStyle={{fontSize:11}}/></LineChart></ResponsiveContainer>
+            <ResponsiveContainer width="100%" height={200}><LineChart data={sD} margin={{top:5,right:10,left:0,bottom:5}}><CartesianGrid strokeDasharray="3 3" stroke={C.border}/><XAxis dataKey="persen" tick={{fontSize:10,fill:C.textMuted}}/><YAxis tick={{fontSize:10,fill:C.textMuted}}/><Tooltip contentStyle={TT} labelStyle={{color:C.text}} itemStyle={{color:C.text}} formatter={v=>[`Rp ${v} T`]}/><Line type="monotone" dataKey="benefit" stroke={C.green} strokeWidth={2} name="Benefit/thn" dot={{r:3}}/><Line type="monotone" dataKey="cost" stroke={C.red} strokeWidth={2} name="Cost (sekali)" dot={{r:3}} strokeDasharray="5 5"/><Legend wrapperStyle={{fontSize:11}}/></LineChart></ResponsiveContainer>
           </Sec>
         </div>
 
