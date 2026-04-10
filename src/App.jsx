@@ -46,6 +46,12 @@ const SRC={
   plnSerap13gw:{l:"Medcom / Antara / PLN",u:"https://www.antaranews.com/berita/2705701/program-kompor-induksi-berpotensi-serap-listrik-13-gigawatt"},
   konversiMitan:{l:"PMC / ScienceDirect",u:"https://pmc.ncbi.nlm.nih.gov/articles/PMC6186446/"},
   prabowo2026:{l:"Kompas / Maret 2026",u:"https://nasional.kompas.com/read/2026/03/05/18193651/prabowo-minta-konversi-kompor-listrik-dikebut-kurangi-ketergantungan-impor"},
+  prodLokal2022:{l:"Liputan6 / Kemenperin (Sep 2022)",u:"https://www.liputan6.com/bisnis/read/5076104/153-juta-kompor-listrik-bakal-dipasok-industri-lokal-sampai-2025"},
+  prodKapasitas5jt:{l:"Katadata / Kemenperin",u:"https://katadata.co.id/tiakomalasari/berita/632ac1960ac26/produksi-kompor-listrik-akan-digenjot-hingga-5-juta-unit-tahun-depan"},
+  prod11pabrikan:{l:"Republika / PLN (Sep 2022)",u:"https://www.republika.co.id/berita/ri750d383/11-pabrikan-lokal-siap-produksi-kompor-induksi-untuk-pln"},
+  prodTKDN:{l:"Katadata (TKDN 25%)",u:"https://katadata.co.id/berita/nasional/632dbec48e291/perusahaan-milik-orang-terkaya-ri-siap-produksi-1-juta-kompor-listrik"},
+  prodKemenperin:{l:"Kemenperin Siaran Pers",u:"https://kemenperin.go.id/artikel/22491/Siap-Produksi,-Industri-Nasional-Dukung-Program-Konversi-1-Juta-Kompor-Listrik"},
+  prod5perusahaan:{l:"CNBC Indonesia (Sep 2022)",u:"https://www.cnbcindonesia.com/market/20220922081651-17-374047/5-perusahaan-ini-cuan-dari-kompor-listrik-ada-konglomerat"},
 };
 const SBtn=({k})=>{const s=SRC[k];if(!s)return null;return<a href={s.u} target="_blank" rel="noopener noreferrer" style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:10,color:C.accent,background:C.accentGlow,border:`1px solid ${C.accentDim}40`,borderRadius:20,padding:"2px 10px 2px 7px",textDecoration:"none",cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}} onMouseEnter={e=>{e.currentTarget.style.background=C.accentDim+"50"}} onMouseLeave={e=>{e.currentTarget.style.background=C.accentGlow}}><span style={{fontSize:9}}>🔗</span>{s.l}</a>;};
 
@@ -74,6 +80,7 @@ export default function App(){
   const[kurs,setKurs]=useState(16200);
   const[sLPG,setSLPG]=useState(true);
   const[hargaKomporUSD,setHKU]=useState(25);
+  const[prodLokalJt,setProdLokal]=useState(0.3); // juta unit/tahun - kapasitas aktual 2022
   const[kr,setKR]=useState(false);
   const[sideOpen,setSideOpen]=useState(false);
 
@@ -91,11 +98,18 @@ export default function App(){
     const nb=Bt-C5,roi=nb>0?Co/(nb/12):Infinity,gw=(rtK*dW*0.3)/1e9;
     const devisaImporKompor=rtK*hargaKomporUSD*kurs; // one-time
     const devisaHematLPGPerTahun=B2_devisa;
-    const roiDevisa=devisaImporKompor/(devisaHematLPGPerTahun/12);
+    const prodLokalUnit=prodLokalJt*1e6;
+    const unitImporKompor=Math.max(0,rtK-prodLokalUnit);
+    const unitLokalKompor=Math.min(rtK,prodLokalUnit);
+    const pctLokal=rtK>0?(unitLokalKompor/rtK)*100:0;
+    const devisaImporKompor=unitImporKompor*hargaKomporUSD*kurs;
+    const roiDevisa=devisaHematLPGPerTahun>0?devisaImporKompor/(devisaHematLPGPerTahun/12):Infinity;
+    const tahunProduksi=prodLokalUnit>0?Math.ceil(rtK/prodLokalUnit):Infinity;
     return{rtK,kwk,kwb,bL,bI,bLE,sel,B1,B2_devisa,B3,Bt,C1,C2,C3,C4,C5,C6,Co,nb,roi,gw,
       r5:nb>0?(nb*5)/Co:0,r10:nb>0?(nb*10)/Co:0,
-      devisaImporKompor,devisaHematLPGPerTahun,roiDevisa};
-  },[rt,alpha,qLPG,pSub,pEkon,tL,dW,bK,hI,kurs,sLPG,hargaKomporUSD]);
+      devisaImporKompor,devisaHematLPGPerTahun,roiDevisa,
+      unitImporKompor,unitLokalKompor,pctLokal,prodLokalUnit,tahunProduksi};
+  },[rt,alpha,qLPG,pSub,pEkon,tL,dW,bK,hI,kurs,sLPG,hargaKomporUSD,prodLokalJt]);
 
   const impD=[{t:"2020",impor:6.40,dom:1.92},{t:"2021",impor:6.10,dom:1.95},{t:"2022",impor:6.74,dom:1.97},{t:"2023",impor:6.95,dom:1.96},{t:"2024",impor:6.89,dom:1.96},{t:"2025",impor:7.49,dom:1.97}];
   const bD=[{name:"Hemat Subsidi (B₁)",value:c.B1/1e12,color:C.green},{name:"Pendapatan PLN (B₃)",value:c.B3/1e12,color:C.cyan}];
@@ -115,7 +129,7 @@ export default function App(){
           <h3 style={{margin:0,fontSize:15,fontWeight:800,color:C.textBright,fontFamily:"'Sora',sans-serif"}}>⚡ Parameter</h3>
           <button onClick={()=>setSideOpen(false)} style={{background:"transparent",border:"none",color:C.textMuted,fontSize:20,cursor:"pointer",padding:4}}>✕</button>
         </div>
-        <Sl label="Total RT (N)" value={rt} onChange={setRt} min={1e6} max={72e6} step={1e6} formatter={v=>`${(v/1e6).toFixed(0)} jt RT`} source="targetRT"/>
+        <Sl label="Total RT (N)" value={rt} onChange={setRt} min={1e6} max={100e6} step={1e6} formatter={v=>`${(v/1e6).toFixed(0)} jt RT`} source="targetRT"/>
         <Sl label="Konversi (α)" value={alpha} onChange={setAlpha} min={5} max={100} step={5} formatter={v=>`${v}%`}/>
         <Sl label="Konsumsi LPG (Q)" value={qLPG} onChange={setQ} min={5} max={20} step={.1} formatter={v=>`${v} kg/bln`} source="konsumsiLPG"/>
         <Sl label="Harga LPG Subsidi (Pₛ)" value={pSub} onChange={setPS} min={4250} max={19698} step={100} formatter={v=>`Rp ${fmt(v)}/kg`} source="hargaSubsidi"/>
@@ -126,6 +140,7 @@ export default function App(){
         <Sl label="Harga Impor LPG" value={hI} onChange={setHI} min={300} max={900} step={10} formatter={v=>`US$ ${v}/ton`} source="hargaImporLPG"/>
         <Sl label="Kurs USD/IDR" value={kurs} onChange={setKurs} min={14000} max={18000} step={100} formatter={v=>`Rp ${fmt(v)}`}/>
         <Sl label="Harga Impor Kompor" value={hargaKomporUSD} onChange={setHKU} min={10} max={80} step={1} formatter={v=>`US$ ${v}/unit`}/>
+        <Sl label="Produksi Lokal Kompor" value={prodLokalJt} onChange={setProdLokal} min={0} max={10} step={.1} formatter={v=>`${v.toFixed(1)} jt unit/thn`} source="prodLokal2022"/>
         <div style={{marginTop:4,padding:"12px 14px",background:C.surface,borderRadius:10,border:`1px solid ${C.border}`}}>
           <label style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer",fontSize:12,color:C.text}}>
             <div onClick={()=>setSLPG(!sLPG)} style={{width:42,height:24,borderRadius:12,position:"relative",transition:"background .3s",background:sLPG?C.red:C.green,cursor:"pointer",flexShrink:0}}><div style={{width:18,height:18,borderRadius:"50%",background:C.white,position:"absolute",top:3,left:sLPG?3:21,transition:"left .3s"}}/></div>
@@ -249,16 +264,61 @@ export default function App(){
           <FB texLines={["C_6 \\approx \\text{Rp }3 \\text{ triliun}"]}/>
         </Sec>
 
-        {/* ═══ BAB 4: NERACA DEVISA ═══ */}
+        {/* ═══ BAB 4: PRODUKSI LOKAL & NERACA DEVISA ═══ */}
         <Sec accent={C.blue}>
-          <ST icon="🌍" title="Bab 4: Neraca Devisa — Impor Kompor vs Hemat Impor LPG" sub="Jika produksi lokal belum cukup, kita tetap impor kompor. Tapi apakah devisa yang keluar untuk kompor lebih kecil dari devisa yang dihemat dari LPG?"/>
-          <P>Misalkan Indonesia harus mengimpor 100% kompor induksi dari China dengan harga rata-rata US$ {hargaKomporUSD}/unit (ubah via ⚙️). Devisa yang keluar:</P>
-          <FB texLines={[`\\text{Devisa impor kompor} = RT_{\\text{konversi}} \\times \\text{US\\$\\ ${hargaKomporUSD}} \\times \\text{Kurs}`]}/>
+          <ST icon="🏭" title="Bab 4: Produksi Lokal & Neraca Devisa" sub="Berapa kapasitas produksi kompor induksi Indonesia? Dan bagaimana neraca devisanya?"/>
+
+          <h3 style={{fontSize:16,color:C.blue,margin:"0 0 8px",fontFamily:"'Sora',sans-serif"}}>Kapasitas Produksi Lokal</h3>
+          <P>Berdasarkan data Kemenperin, pada 2022 hanya ada <b>satu produsen aktif</b> kompor induksi di Indonesia: <b>PT Adyawinsa Electrical and Power (Myamin)</b> dengan kapasitas <b>300.000 unit/tahun</b>. PT Maspion juga memiliki kapasitas 300.000 unit/tahun. <SBtn k="prodKemenperin"/></P>
+          <P>PLN mengidentifikasi <b>11 pabrikan lokal</b> yang siap memproduksi kompor induksi. <SBtn k="prod11pabrikan"/> Dirjen ILMATE Kemenperin Taufiek Bawazier menyatakan bahwa jika program konversi dilanjutkan, kapasitas bisa naik ke <b>5 juta unit/tahun</b> mulai 2023 — dengan rincian: <SBtn k="prodKapasitas5jt"/></P>
+
+          <div style={{overflowX:"auto",margin:"12px 0"}}><table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
+            <thead><tr style={{borderBottom:`2px solid ${C.borderLight}`}}>
+              {["Produsen","Kapasitas/Tahun","Status"].map((h,i)=><th key={i} style={{padding:"8px 10px",fontSize:10,color:C.textMuted,textTransform:"uppercase",letterSpacing:1,textAlign:"left",fontWeight:600}}>{h}</th>)}
+            </tr></thead>
+            <tbody>
+              {[
+                {n:"PT Adyawinsa (Myamin)",k:"1,2 juta",s:"Aktif, sudah produksi"},
+                {n:"PT Hartono Istana (Polytron)",k:"1 juta",s:"Siap produksi"},
+                {n:"PT Sutrakabel (Sutrado)",k:"1 juta",s:"Siap produksi"},
+                {n:"PT Maspion Elektronik",k:"300 ribu",s:"Siap produksi"},
+                {n:"PT Selaras Citra (Turbo)",k:"300 ribu",s:"Siap produksi"},
+                {n:"6 perusahaan lainnya",k:"1,2 juta",s:"Berminat, belum komit"},
+              ].map((r,i)=><tr key={i} style={{borderBottom:`1px solid ${C.border}`}}>
+                <td style={{padding:"8px 10px",color:C.text}}>{r.n}</td>
+                <td style={{padding:"8px 10px",color:C.accent,fontFamily:"'Space Mono',monospace",fontWeight:700}}>{r.k}</td>
+                <td style={{padding:"8px 10px",color:i===0?C.green:C.textMuted,fontSize:12}}>{r.s}</td>
+              </tr>)}
+              <tr style={{borderTop:`2px solid ${C.borderLight}`}}>
+                <td style={{padding:"8px 10px",color:C.textBright,fontWeight:700}}>Total kapasitas potensial</td>
+                <td style={{padding:"8px 10px",color:C.green,fontFamily:"'Space Mono',monospace",fontWeight:700}}>5 juta/tahun</td>
+                <td style={{padding:"8px 10px",color:C.textMuted,fontSize:12}}>Jika program dilanjutkan</td>
+              </tr>
+            </tbody>
+          </table></div>
+          <P>Catatan penting: TKDN kompor induksi saat ini baru <b style={{color:C.accent}}>25%</b>. Artinya 75% komponen masih diimpor — termasuk coil induksi, IGBT, dan kontroler. Namun Kemenperin optimis TKDN akan naik seiring peningkatan volume produksi. <SBtn k="prodTKDN"/></P>
+
+          <CO type="warning"><b>Realita vs rencana:</b> Karena program konversi dibatalkan pada September 2022, sebagian besar ekspansi kapasitas ini <b>kemungkinan belum terealisasi</b>. Kapasitas aktual 2025–2026 diperkirakan masih di kisaran 300.000–500.000 unit/tahun. Geser slider "Produksi Lokal Kompor" di ⚙️ untuk mensimulasikan berbagai skenario.</CO>
+
+          <h3 style={{fontSize:16,color:C.blue,margin:"24px 0 8px",fontFamily:"'Sora',sans-serif"}}>Neraca Devisa: Impor Kompor vs Hemat Impor LPG</h3>
+          <P>Pertanyaan kritis: jika produksi lokal belum cukup, kita tetap harus impor kompor. Apakah devisa yang keluar untuk kompor lebih kecil dari devisa yang dihemat dari tidak mengimpor LPG?</P>
+
+          <P>Dengan kapasitas produksi lokal <b style={{color:C.green}}>{(prodLokalJt).toFixed(1)} juta unit/tahun</b> dan kebutuhan <b style={{color:C.accent}}>{(c.rtK/1e6).toFixed(1)} juta unit</b>, maka:</P>
+
+          <FB texLines={[
+            `\\text{Unit diproduksi lokal} = \\min(RT_{\\text{konversi}},\\; \\text{Kapasitas lokal}) = ${fmt(c.unitLokalKompor)} \\text{ unit}`,
+            `\\text{Unit harus diimpor} = RT_{\\text{konversi}} - \\text{Unit lokal} = ${fmt(c.unitImporKompor)} \\text{ unit}`,
+            `\\text{Porsi lokal} = \\frac{${fmt(c.unitLokalKompor)}}{${fmt(c.rtK)}} = \\boxed{${c.pctLokal.toFixed(1)}\\%}`
+          ]}/>
+
+          <P>Devisa yang keluar untuk mengimpor unit yang tidak bisa diproduksi lokal, dengan harga impor US$ {hargaKomporUSD}/unit:</P>
+          <FB texLines={[`\\text{Devisa impor kompor} = ${fmt(c.unitImporKompor)} \\times \\text{US\\$\\ ${hargaKomporUSD}} \\times ${fmt(kurs)} = \\boxed{${fmtT(c.devisaImporKompor)}}`]}/>
+
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:12,margin:"16px 0"}}>
             <div style={{background:C.surface,borderRadius:10,padding:"14px 16px",border:`1px solid ${C.border}`}}>
               <div style={{fontSize:10,color:C.textMuted,textTransform:"uppercase",letterSpacing:1}}>Devisa keluar — impor kompor (sekali)</div>
-              <div style={{fontSize:22,fontWeight:800,color:C.red,fontFamily:"'Space Mono',monospace"}}>{fmtT(c.devisaImporKompor)}</div>
-              <div style={{fontSize:11,color:C.textMuted}}>≈ US$ {(c.devisaImporKompor/kurs/1e6).toFixed(0)} juta</div>
+              <div style={{fontSize:22,fontWeight:800,color:c.devisaImporKompor>0?C.red:C.green,fontFamily:"'Space Mono',monospace"}}>{c.devisaImporKompor>0?fmtT(c.devisaImporKompor):"Rp 0 (100% lokal!)"}</div>
+              <div style={{fontSize:11,color:C.textMuted}}>≈ US$ {(c.devisaImporKompor/kurs/1e6).toFixed(0)} juta • {c.pctLokal.toFixed(0)}% lokal</div>
             </div>
             <div style={{background:C.surface,borderRadius:10,padding:"14px 16px",border:`1px solid ${C.border}`}}>
               <div style={{fontSize:10,color:C.textMuted,textTransform:"uppercase",letterSpacing:1}}>Devisa dihemat — LPG tidak diimpor (/tahun)</div>
@@ -266,9 +326,17 @@ export default function App(){
               <div style={{fontSize:11,color:C.textMuted}}>≈ US$ {(c.devisaHematLPGPerTahun/kurs/1e6).toFixed(0)} juta/tahun</div>
             </div>
           </div>
-          <FB texLines={[`\\text{ROI devisa} = \\frac{\\text{Devisa impor kompor}}{\\text{Devisa hemat LPG / 12}} = \\boxed{${c.roiDevisa>0&&c.roiDevisa<999?c.roiDevisa.toFixed(1):"\\infty"} \\text{ bulan}}`]}/>
-          <P>Artinya: meskipun <b>100% kompor diimpor</b>, devisa yang keluar untuk membeli kompor (<b style={{color:C.red}}>{fmtT(c.devisaImporKompor)}</b> sekali) langsung tergantikan oleh devisa LPG yang dihemat (<b style={{color:C.green}}>{fmtT(c.devisaHematLPGPerTahun)}/tahun</b>) hanya dalam <b style={{color:C.accent}}>{c.roiDevisa>0&&c.roiDevisa<999?c.roiDevisa.toFixed(1):"∞"} bulan</b>. Dan ini biaya sekali — setelahnya, hemat devisa terus berjalan setiap tahun.</P>
-          <CO type="success">Bahkan dalam skenario terburuk (100% impor kompor), neraca devisa tetap positif dalam hitungan bulan. Jika sebagian diproduksi lokal, devisa keluar bahkan lebih kecil lagi.</CO>
+
+          {c.devisaImporKompor>0 && <FB texLines={[`\\text{ROI devisa} = \\frac{${fmtT(c.devisaImporKompor)}}{${fmtT(c.devisaHematLPGPerTahun)} \\div 12} = \\boxed{${c.roiDevisa>0&&c.roiDevisa<999?c.roiDevisa.toFixed(1):"\\infty"} \\text{ bulan}}`]}/>}
+
+          <P>{c.devisaImporKompor>0
+            ? <>Meskipun {c.pctLokal<100?`${(100-c.pctLokal).toFixed(0)}% kompor harus diimpor`:"semua kompor diimpor"}, devisa yang keluar (<b style={{color:C.red}}>{fmtT(c.devisaImporKompor)}</b> sekali) tergantikan oleh devisa LPG yang dihemat (<b style={{color:C.green}}>{fmtT(c.devisaHematLPGPerTahun)}/tahun</b>) hanya dalam <b style={{color:C.accent}}>{c.roiDevisa.toFixed(1)} bulan</b>. Setelahnya, hemat devisa terus berjalan setiap tahun.</>
+            : <>Dengan produksi lokal mencukupi 100% kebutuhan, <b style={{color:C.green}}>tidak ada devisa yang keluar untuk impor kompor sama sekali</b> — sementara hemat devisa LPG tetap {fmtT(c.devisaHematLPGPerTahun)}/tahun.</>
+          }</P>
+
+          {c.tahunProduksi>1 && <P>Catatan kapasitas: dengan produksi {(prodLokalJt).toFixed(1)} juta unit/tahun, dibutuhkan <b style={{color:C.accent}}>{c.tahunProduksi} tahun</b> untuk memenuhi {(c.rtK/1e6).toFixed(1)} juta unit — memperkuat argumen bahwa konversi harus <b>bertahap</b>.</P>}
+
+          <CO type="success"><b>Kesimpulan:</b> Bahkan dalam skenario produksi lokal rendah ({(prodLokalJt).toFixed(1)} jt/tahun), neraca devisa tetap positif dalam hitungan bulan. Meningkatkan kapasitas lokal (geser slider ke 5 jt sesuai rencana Kemenperin) membuat devisa keluar semakin kecil.</CO>
         </Sec>
 
         {/* ═══ METRICS ═══ */}
@@ -330,17 +398,6 @@ export default function App(){
           <CO type="success"><b>Jawaban: Ya — dampak positif lebih besar.</b> Bahkan tanpa menghitung B₂ (devisa), setiap Rp 1 → <b style={{color:C.accent}}>Rp {c.r10>0?c.r10.toFixed(1):"–"}</b> dalam 10 tahun. Balik modal <b style={{color:C.accent}}>{c.roi>0&&c.roi<999?`${c.roi.toFixed(1)} bulan`:"–"}</b>. Dan neraca devisa tetap positif meski 100% kompor diimpor.</CO>
         </Sec>
 
-        {/* ═══ BAB 6 ═══ */}
-        <Sec accent={C.purple}>
-          <ST icon="🗺️" title="Bab 6: Kenapa Belum Terjadi?" sub="Hambatan utama: politik, budaya, eksekusi."/>
-          <P>Jika angkanya begitu meyakinkan, mengapa belum berjalan? Karena mencabut subsidi LPG = bunuh diri politik (harga tabung naik dari Rp 12.750 ke ~Rp 59.000), kebiasaan memasak api terbuka sudah mengakar, dan upgrade infrastruktur butuh waktu bertahun-tahun.</P>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:12,marginTop:12}}>
-            {[{p:"Jangka Pendek",t:"2026–2028",tgt:"1–3 jt RT",st:"⚠️ Terbatas",co:C.accent,items:["Pilot 10–20 kota","RT ≥2.200 VA","Redesain subsidi","Manufaktur lokal"]},{p:"Jangka Menengah",t:"2028–2035",tgt:"10–20 jt RT",st:"✅ Realistis",co:C.green,items:["Upgrade distribusi","MCB jalur khusus","Harga kompor turun","Subsidi LPG dikurangi"]},{p:"Jangka Panjang",t:"2035–2060",tgt:"52 jt RT",st:"🎯 Ambisius",co:C.blue,items:["Bauran EBT dominan","Infra 100% siap","Generasi baru","LPG hanya industri"]}].map((p,i)=>(
-              <div key={i} style={{background:C.surface,borderRadius:12,padding:16,border:`1px solid ${C.border}`,position:"relative",overflow:"hidden"}}><div style={{position:"absolute",top:0,left:0,right:0,height:3,background:p.co}}/><div style={{fontSize:15,fontWeight:700,color:p.co,fontFamily:"'Sora',sans-serif"}}>{p.p}</div><div style={{fontSize:11,color:C.textMuted}}>{p.t}</div><div style={{fontSize:20,fontWeight:800,color:C.textBright,fontFamily:"'Space Mono',monospace",margin:"8px 0 4px"}}>{p.tgt}</div><div style={{fontSize:12,color:p.co,marginBottom:10}}>{p.st}</div>{p.items.map((x,j)=><div key={j} style={{fontSize:11,color:C.textMuted,padding:"3px 0",borderTop:j===0?`1px solid ${C.border}`:"none"}}>→ {x}</div>)}</div>
-            ))}
-          </div>
-          <CO type="warning"><b>Kesimpulan:</b> Langkah pertama yang paling kritis: <b>reformasi subsidi LPG 3 kg</b> yang 62,3%-nya salah sasaran. Tanpa mengubah insentif ini, masyarakat tidak punya alasan rasional meninggalkan LPG bersubsidi.</CO>
-        </Sec>
 
         <div style={{textAlign:"center",padding:"20px 0 36px",borderTop:`1px solid ${C.border}`,marginTop:8}}>
           <p style={{fontSize:11,color:C.textMuted,margin:"0 0 4px"}}>Sumber: ESDM • PLN • Reforminer • CNBC Indonesia • Databoks • INDEF • DEN • BPS • Kemenperin</p>
